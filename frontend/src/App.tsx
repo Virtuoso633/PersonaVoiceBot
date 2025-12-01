@@ -209,12 +209,19 @@ function Home() {
 
       const sendCandidate = async (id: string, candidate: RTCIceCandidate) => {
         try {
+          const candidateJSON = candidate.toJSON();
           await fetch(`${API_URL}/candidate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               pc_id: id,
-              candidates: [candidate.toJSON()],
+              candidates: [
+                {
+                  candidate: candidateJSON.candidate,
+                  sdp_mid: candidateJSON.sdpMid,
+                  sdp_mline_index: candidateJSON.sdpMLineIndex,
+                },
+              ],
             }),
           });
         } catch (err) {
