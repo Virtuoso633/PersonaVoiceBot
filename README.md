@@ -1,4 +1,4 @@
-# Voice Bot - Pipecat Official Quickstart
+# Voice Bot
 
 Build a production-ready AI voice bot using the **official Pipecat quickstart pattern**. No Daily.co needed!
 
