@@ -1,4 +1,5 @@
 import os
+import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +13,13 @@ from bot import run_bot
 from pipecat.transports.smallwebrtc.transport import SmallWebRTCTransport, SmallWebRTCCallbacks
 from pipecat.transports.base_transport import TransportParams
 import json
+import logging
 from pipecat.runner.types import RunnerArguments
+
+# --- Logging Configuration ---
+logger.remove()
+logger.add(sys.stderr, level="DEBUG")
+logging.basicConfig(level=logging.DEBUG) # Enable aiortc debug logs
 
 # --- Helpers ---
 def get_ice_servers():
