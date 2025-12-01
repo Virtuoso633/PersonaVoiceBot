@@ -52,7 +52,10 @@ async def offer_endpoint(request: SmallWebRTCRequest):
     """Handle WebRTC offer from client."""
     try:
         # 1. Create a new connection
-        connection = SmallWebRTCConnection()
+        # Configure STUN server for production
+        connection = SmallWebRTCConnection(
+            ice_servers=[{"urls": "stun:stun.l.google.com:19302"}]
+        )
         
         # 2. Initialize with offer
         await connection.initialize(request.sdp, request.type)
@@ -118,6 +121,11 @@ async def candidate_endpoint(request: Request):
             
             # Skip if candidate string is empty (end of candidates)
             if not candidate_str:
+                continue
+                
+            # Skip if missing required fields for aiortc
+            if sdp_mid is None and sdp_mline_index is None:
+                logger.debug("Skipping candidate without sdpMid or sdpMLineIndex")
                 continue
             
             try:
