@@ -68,6 +68,8 @@ async def offer_endpoint(request: SmallWebRTCRequest):
             
         pc_id = answer["pc_id"]
         active_connections[pc_id] = connection
+        logger.info(f"Created connection with pc_id: {pc_id}")
+        logger.info(f"Active connections: {list(active_connections.keys())}")
         
         # 3. Start the bot
         # Create callbacks (empty for now as we don't handle app messages yet)
@@ -109,6 +111,9 @@ async def candidate_endpoint(request: Request):
         data = await request.json()
         pc_id = data.get("pc_id")
         candidates = data.get("candidates", [])
+        
+        logger.info(f"Received candidate for pc_id: {pc_id}")
+        logger.info(f"Active connections: {list(active_connections.keys())}")
         
         connection = active_connections.get(pc_id)
         
