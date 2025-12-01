@@ -197,6 +197,34 @@ function Home() {
       dc.onopen = () => console.log("Data channel open");
       dc.onmessage = handleMessage;
 
+      let sessionId: string | null = null;
+      const candidateQueue: RTCIceCandidate[] = [];
+
+      const sendCandidate = async (id: string, candidate: RTCIceCandidate) => {
+        try {
+          await fetch(`${API_URL}/candidate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              pc_id: id,
+              candidates: [candidate.toJSON()],
+            }),
+          });
+        } catch (err) {
+          console.warn("Failed to send candidate:", err);
+        }
+      };
+
+      pc.onicecandidate = async (event) => {
+        if (event.candidate) {
+          if (sessionId) {
+            await sendCandidate(sessionId, event.candidate);
+          } else {
+            candidateQueue.push(event.candidate);
+          }
+        }
+      };
+
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
@@ -208,30 +236,20 @@ function Home() {
 
       if (!res.ok) throw new Error("Failed to get offer");
       const answer = await res.json();
-      const sessionId = answer.pc_id;
+      sessionId = answer.pc_id;
+
+      // Flush candidate queue
+      for (const candidate of candidateQueue) {
+        if (sessionId) {
+          await sendCandidate(sessionId, candidate);
+        }
+      }
 
       await pc.setRemoteDescription(answer);
 
       pc.ondatachannel = (event) => {
         const dc = event.channel;
         dc.onmessage = handleMessage;
-      };
-
-      pc.onicecandidate = async (event) => {
-        if (event.candidate) {
-          try {
-            await fetch(`${API_URL}/candidate`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                pc_id: sessionId,
-                candidates: [event.candidate.toJSON()],
-              }),
-            });
-          } catch (err) {
-            console.warn("Failed to send candidate:", err);
-          }
-        }
       };
 
       setIsConnected(true);
