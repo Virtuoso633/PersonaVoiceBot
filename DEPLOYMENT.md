@@ -29,11 +29,21 @@ git push -u origin main
 5.  Render should automatically detect the configuration from `render.yaml`.
     - **Runtime**: Python 3
     - **Build Command**: `pip install uv && uv sync`
-    - **Start Command**: `uv run python server.py`
+    - **Start Command**: `uv run uvicorn server:app --host 0.0.0.0 --port $PORT`
 6.  Add Environment Variables:
     - `OPENAI_API_KEY`: Your OpenAI API Key
     - `CARTESIA_API_KEY`: Your Cartesia API Key
     - `DEEPGRAM_API_KEY`: Your Deepgram API Key
+    - `ICE_SERVERS`: JSON string of your TURN server configuration. Example:
+      ```json
+      [
+        {
+          "urls": "turn:your-turn-server.com",
+          "username": "user",
+          "credential": "password"
+        }
+      ]
+      ```
     - `PORT`: `7860` (Render sets this automatically, but good to verify)
 7.  Click **Create Web Service**.
 

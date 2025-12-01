@@ -178,8 +178,15 @@ function Home() {
 
   const startInterview = async () => {
     try {
+      // Fetch connection details including ICE servers
+      const connRes = await fetch(`${API_URL}/`);
+      if (!connRes.ok) throw new Error("Failed to get connection details");
+      const connDetails = await connRes.json();
+
       const pc = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        iceServers: connDetails.ice_servers || [
+          { urls: "stun:stun.l.google.com:19302" },
+        ],
       });
       pcRef.current = pc;
 

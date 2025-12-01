@@ -11,7 +11,20 @@ from pipecat.transports.smallwebrtc.connection import SmallWebRTCConnection
 from bot import run_bot
 from pipecat.transports.smallwebrtc.transport import SmallWebRTCTransport, SmallWebRTCCallbacks
 from pipecat.transports.base_transport import TransportParams
+import json
 from pipecat.runner.types import RunnerArguments
+
+# --- Helpers ---
+def get_ice_servers():
+    """Get ICE servers from environment variable or default to Google STUN."""
+    ice_servers_env = os.getenv("ICE_SERVERS")
+    if ice_servers_env:
+        try:
+            return json.loads(ice_servers_env)
+        except json.JSONDecodeError:
+            logger.error("Failed to parse ICE_SERVERS environment variable")
+            
+    return [{"urls": "stun:stun.l.google.com:19302"}]
 
 # --- Configuration ---
 HOST = os.getenv("HOST", "0.0.0.0")
@@ -44,19 +57,32 @@ app.add_middleware(
 # --- Routes ---
 
 @app.get("/")
+@app.get("/")
 async def get_connection_details():
     """Return connection details for the frontend."""
-    return {"transport": "webrtc", "url": f"http://localhost:{PORT}"}
+    return {
+        "transport": "webrtc", 
+        "url": f"http://localhost:{PORT}",
+        "ice_servers": get_ice_servers()
+    }
 
 @app.post("/offer")
 async def offer_endpoint(request: SmallWebRTCRequest):
     """Handle WebRTC offer from client."""
     try:
         # 1. Create a new connection
-        # Configure STUN server for production
-        # Configure STUN server for production
+        # Configure STUN/TURN servers
+        ice_servers_config = get_ice_servers()
+        rtc_ice_servers = [
+            RTCIceServer(
+                urls=server.get("urls"),
+                username=server.get("username"),
+                credential=server.get("credential")
+            ) for server in ice_servers_config
+        ]
+        
         connection = SmallWebRTCConnection(
-            ice_servers=[RTCIceServer(urls="stun:stun.l.google.com:19302")]
+            ice_servers=rtc_ice_servers
         )
         
         # 2. Initialize with offer
