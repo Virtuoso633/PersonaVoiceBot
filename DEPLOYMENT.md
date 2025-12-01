@@ -37,10 +37,26 @@ git push -u origin main
     - `ICE_SERVERS`: JSON string of your TURN server configuration. Example:
       ```json
       [
+        { "urls": "stun:stun.relay.metered.ca:80" },
         {
-          "urls": "turn:your-turn-server.com",
-          "username": "user",
-          "credential": "password"
+          "urls": "turn:global.relay.metered.ca:80",
+          "username": "your_username",
+          "credential": "your_password"
+        },
+        {
+          "urls": "turn:global.relay.metered.ca:80?transport=tcp",
+          "username": "your_username",
+          "credential": "your_password"
+        },
+        {
+          "urls": "turn:global.relay.metered.ca:443",
+          "username": "your_username",
+          "credential": "your_password"
+        },
+        {
+          "urls": "turns:global.relay.metered.ca:443?transport=tcp",
+          "username": "your_username",
+          "credential": "your_password"
         }
       ]
       ```
