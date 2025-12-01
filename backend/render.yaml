@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: pipecat-voice-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: PORT
+        value: 7860
+    disk:
+      name: cache
+      mountPath: /root/.cache
+      sizeGB: 1
