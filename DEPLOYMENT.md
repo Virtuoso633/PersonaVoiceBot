@@ -28,8 +28,8 @@ git push -u origin main
 4.  Select the **backend** directory as the **Root Directory**.
 5.  Render should automatically detect the configuration from `render.yaml`.
     - **Runtime**: Python 3
-    - **Build Command**: `pip install -r requirements.txt`
-    - **Start Command**: `python server.py`
+    - **Build Command**: `pip install uv && uv sync`
+    - **Start Command**: `uv run python server.py`
 6.  Add Environment Variables:
     - `OPENAI_API_KEY`: Your OpenAI API Key
     - `CARTESIA_API_KEY`: Your Cartesia API Key
