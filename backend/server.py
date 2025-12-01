@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
 from aiortc.sdp import candidate_from_sdp
+from aiortc import RTCIceServer
 from pipecat.transports.smallwebrtc.request_handler import SmallWebRTCRequest
 from pipecat.transports.smallwebrtc.connection import SmallWebRTCConnection
 from bot import run_bot
@@ -53,8 +54,9 @@ async def offer_endpoint(request: SmallWebRTCRequest):
     try:
         # 1. Create a new connection
         # Configure STUN server for production
+        # Configure STUN server for production
         connection = SmallWebRTCConnection(
-            ice_servers=[{"urls": "stun:stun.l.google.com:19302"}]
+            ice_servers=[RTCIceServer(urls="stun:stun.l.google.com:19302")]
         )
         
         # 2. Initialize with offer
