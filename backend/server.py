@@ -99,6 +99,8 @@ async def offer_endpoint(request: SmallWebRTCRequest):
         if not answer:
             raise Exception("Failed to create answer")
             
+        logger.debug(f"Generated Answer SDP: {answer['sdp']}")
+            
         pc_id = answer["pc_id"]
         active_connections[pc_id] = connection
         logger.info(f"Created connection with pc_id: {pc_id}")
