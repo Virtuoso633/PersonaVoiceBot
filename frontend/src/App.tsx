@@ -20,6 +20,7 @@ import Ripple from "@/components/magicui/ripple";
 import Marquee from "@/components/magicui/marquee";
 import { RainbowButton } from "@/components/magicui/rainbow-button";
 import { UserMenu } from "@/components/ui/user-menu";
+import { AnimatedGreeting } from "@/components/ui/animated-greeting";
 import {
   BrowserRouter,
   Routes,
@@ -28,6 +29,12 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { ThemeProvider, useTheme } from "next-themes";
+import { LoginPage } from "@/components/auth/LoginPage";
+import { SignupPage } from "@/components/auth/SignupPage";
+import { ForgotPasswordPage } from "@/components/auth/ForgotPasswordPage";
+import { ResetPasswordPage } from "@/components/auth/ResetPasswordPage";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useAuthStore } from "@/store/authStore";
 
 // --- Helper Components ---
 
@@ -112,6 +119,10 @@ function Navbar() {
 function UserProfile() {
   const { username } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const displayName = user?.user_metadata?.full_name || username || "User";
+  const userEmail = user?.email || `${username}@example.com`;
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-24 md:pt-32 px-4 flex flex-col items-center">
@@ -120,12 +131,12 @@ function UserProfile() {
 
         <div className="flex items-center gap-6 mb-8">
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-3xl md:text-4xl font-bold">
-            {username?.[0]?.toUpperCase()}
+            {displayName[0]?.toUpperCase()}
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">{username}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{displayName}</h1>
             <p className="text-muted-foreground">
-              Full Stack Developer & AI Enthusiast
+              {user?.user_metadata?.bio || "Voice Assistant User"}
             </p>
           </div>
         </div>
@@ -135,7 +146,7 @@ function UserProfile() {
             <h3 className="text-sm font-medium text-muted-foreground mb-2">
               Email
             </h3>
-            <p className="text-foreground">{username}@example.com</p>
+            <p className="text-foreground">{userEmail}</p>
           </div>
           <div className="p-4 rounded-xl bg-white/5 border border-white/5">
             <h3 className="text-sm font-medium text-zinc-400 mb-2">
@@ -167,6 +178,17 @@ function Home() {
   const [messages, setMessages] = useState<
     { role: string; text: string; isFinal?: boolean }[]
   >([]);
+  const { session, user } = useAuthStore();
+  const [showGreeting, setShowGreeting] = useState(false);
+
+  // Show personalized greeting when user first arrives
+  useEffect(() => {
+    if (user) {
+      // Small delay before showing greeting
+      const timer = setTimeout(() => setShowGreeting(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
 
   useEffect(() => {
     return () => {
@@ -212,7 +234,10 @@ function Home() {
           const candidateJSON = candidate.toJSON();
           await fetch(`${API_URL}/candidate`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.access_token || ""}`,
+            },
             body: JSON.stringify({
               pc_id: id,
               candidates: [
@@ -244,7 +269,10 @@ function Home() {
 
       const res = await fetch(`${API_URL}/offer`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token || ""}`,
+        },
         body: JSON.stringify({ sdp: offer.sdp, type: offer.type }),
       });
 
@@ -509,19 +537,51 @@ function Home() {
       </main>
 
       <audio ref={audioRef} autoPlay />
-      <Toaster theme="dark" position="top-center" />
+
+      {/* Animated Greeting */}
+      {showGreeting && user && (
+        <AnimatedGreeting
+          name={user.user_metadata?.full_name?.split(" ")[0] || "there"}
+          onComplete={() => setShowGreeting(false)}
+        />
+      )}
     </div>
   );
 }
 
 function App() {
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/:username" element={<UserProfile />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/:username"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
+        <Toaster theme="dark" position="top-center" />
       </BrowserRouter>
     </ThemeProvider>
   );

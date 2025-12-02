@@ -1,7 +1,7 @@
 import os
 import sys
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
@@ -15,6 +15,8 @@ from pipecat.transports.base_transport import TransportParams
 import json
 import logging
 from pipecat.runner.types import RunnerArguments
+from pydantic import BaseModel
+from auth import supabase, get_current_user
 
 # --- Logging Configuration ---
 logger.remove()
@@ -53,9 +55,21 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # --- CORS ---
+# Get frontend URL from environment (for production deployment)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+# Allow both localhost (dev) and production frontend
+allowed_origins = [
+    "http://localhost:5173",  # Development
+    FRONTEND_URL,  # Production (set in Render environment variables)
+]
+
+# Remove duplicates
+allowed_origins = list(set(allowed_origins))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -63,7 +77,120 @@ app.add_middleware(
 
 # --- Routes ---
 
-@app.get("/")
+# Auth Models
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    full_name: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/auth/signup")
+async def signup(request: SignupRequest):
+    """Register a new user."""
+    try:
+        if not supabase:
+            raise HTTPException(status_code=500, detail="Authentication service not configured")
+        
+        # Sign up user with Supabase
+        response = supabase.auth.sign_up({
+            "email": request.email,
+            "password": request.password,
+            "options": {
+                "data": {
+                    "full_name": request.full_name
+                }
+            }
+        })
+        
+        if not response.user:
+            raise HTTPException(status_code=400, detail="Signup failed")
+        
+        return {
+            "user": {
+                "id": response.user.id,
+                "email": response.user.email,
+                "full_name": request.full_name
+            },
+            "session": {
+                "access_token": response.session.access_token,
+                "refresh_token": response.session.refresh_token
+            }
+        }
+    except Exception as e:
+        logger.error(f"Signup error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/auth/login")
+async def login(request: LoginRequest):
+    """Login an existing user."""
+    try:
+        if not supabase:
+            raise HTTPException(status_code=500, detail="Authentication service not configured")
+        
+        # Sign in user with Supabase
+        response = supabase.auth.sign_in_with_password({
+            "email": request.email,
+            "password": request.password
+        })
+        
+        if not response.user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        return {
+            "user": {
+                "id": response.user.id,
+                "email": response.user.email,
+                "full_name": response.user.user_metadata.get("full_name", "")
+            },
+            "session": {
+                "access_token": response.session.access_token,
+                "refresh_token": response.session.refresh_token
+            }
+        }
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+@app.get("/auth/me")
+async def get_me(current_user: dict = Depends(get_current_user)):
+    """Get current authenticated user."""
+    return {"user": current_user}
+
+@app.post("/auth/check-email")
+async def check_email(request: Request):
+    """Check if an email exists in the database."""
+    try:
+        data = await request.json()
+        email = data.get("email")
+        
+        if not email:
+            raise HTTPException(status_code=400, detail="Email is required")
+        
+        if not supabase:
+            raise HTTPException(status_code=500, detail="Authentication service not configured")
+        
+        # Use Supabase Admin API to check if user exists
+        # This uses the service key which has admin privileges
+        try:
+            response = supabase.auth.admin.list_users()
+            users = response if isinstance(response, list) else []
+            
+            # Check if any user has this email
+            email_exists = any(user.email == email for user in users)
+            
+            return {"exists": email_exists}
+        except Exception as e:
+            logger.error(f"Error checking email: {e}")
+            # If we can't check, return exists: false to be safe
+            return {"exists": False}
+            
+    except Exception as e:
+        logger.error(f"Check email error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
 @app.get("/")
 async def get_connection_details():
     """Return connection details for the frontend."""
@@ -74,9 +201,10 @@ async def get_connection_details():
     }
 
 @app.post("/offer")
-async def offer_endpoint(request: SmallWebRTCRequest):
-    """Handle WebRTC offer from client."""
+async def offer_endpoint(request: SmallWebRTCRequest, current_user: dict = Depends(get_current_user)):
+    """Handle WebRTC offer from client (protected)."""
     try:
+        logger.info(f"WebRTC offer from user: {current_user['email']}")
         # 1. Create a new connection
         # Configure STUN/TURN servers
         ice_servers_config = get_ice_servers()
@@ -127,10 +255,14 @@ async def offer_endpoint(request: SmallWebRTCRequest):
             params=TransportParams(audio_out_enabled=True, video_out_enabled=False, audio_in_enabled=True)
         )
         
-        # Run bot in background
+        # Extract user's first name for personalized greeting
+        user_full_name = current_user.get("user_metadata", {}).get("full_name", "")
+        user_first_name = user_full_name.split()[0] if user_full_name else None
+        
+        # Run bot in background with user's name
         runner_args = RunnerArguments()
         import asyncio
-        asyncio.create_task(run_bot(transport, runner_args))
+        asyncio.create_task(run_bot(transport, runner_args, user_name=user_first_name))
         
         # 4. Return answer
         return answer
@@ -140,7 +272,7 @@ async def offer_endpoint(request: SmallWebRTCRequest):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 @app.post("/candidate")
-async def candidate_endpoint(request: Request):
+async def candidate_endpoint(request: Request, current_user: dict = Depends(get_current_user)):
     """Handle ICE candidate from client."""
     try:
         data = await request.json()
