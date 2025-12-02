@@ -271,7 +271,7 @@ function Home() {
     } catch (err: any) {
       console.error("Connection failed:", err);
 
-      // Provide specific error messages
+      // Provide specific error messagess
       let errorMessage = "Failed to connect. ";
       if (err.name === "NotAllowedError") {
         errorMessage =
