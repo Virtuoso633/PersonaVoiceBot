@@ -268,9 +268,29 @@ function Home() {
 
       setIsConnected(true);
       toast.success("Connected to AI Persona");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Connection failed:", err);
-      toast.error("Failed to connect. Is the server running?");
+
+      // Provide specific error messages
+      let errorMessage = "Failed to connect. ";
+      if (err.name === "NotAllowedError") {
+        errorMessage =
+          "Microphone access denied. Please allow microphone access and try again.";
+      } else if (err.name === "NotFoundError") {
+        errorMessage = "No microphone found. Please check your device.";
+      } else if (err.name === "NotReadableError") {
+        errorMessage =
+          "Microphone is being used by another app. Please close other apps and try again.";
+      } else if (err.message?.includes("HTTPS")) {
+        errorMessage =
+          "HTTPS required for microphone access. Please use HTTPS.";
+      } else if (err.message) {
+        errorMessage += err.message;
+      } else {
+        errorMessage += "Is the server running?";
+      }
+
+      toast.error(errorMessage);
       setIsConnected(false);
     }
   };
