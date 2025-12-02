@@ -13,8 +13,10 @@
 - 🧠 **Smart Context** - Maintains conversation history across multiple turns
 - 🎨 **Beautiful UI** - Modern dark-themed interface with streaming transcriptions
 - 🌐 **Production Deployment** - Live on Render (backend) and Vercel (frontend)
-- 🔒 **Secure** - Environment-based API key management
-- 🚀 **Auto-Greeting** - Bot introduces itself when you connect
+- 🔒 **Secure Authentication** - Supabase Auth with email/password, protected routes, and persistent sessions
+- 👤 **User Profiles** - Personalized dashboard and greeting messages
+- 🚀 **Auto-Greeting** - Bot introduces itself by name when you connect
+- 💫 **Interactive UI** - Animated greetings, user menu, and dynamic text streaming
 
 ## 🏗️ System Architecture
 
@@ -105,6 +107,8 @@ sequenceDiagram
 | WebRTC    | **aiortc + SmallWebRTC** | 1.14.0+     | Peer-to-peer audio transport |
 | VAD       | **Silero**               | Latest      | Voice activity detection     |
 | Logging   | **Loguru**               | 0.7.3       | Structured logging           |
+| Auth      | **Supabase**             | Latest      | Authentication & Database    |
+| Security  | **JWT**                  | Latest      | Token-based auth             |
 
 ### Frontend
 
@@ -119,6 +123,8 @@ sequenceDiagram
 | Icons         | **Lucide React**  | Latest   | Icon library               |
 | Routing       | **React Router**  | 7.9.6    | Client-side routing        |
 | Notifications | **Sonner**        | 2.0.7    | Toast notifications        |
+| Auth          | **Supabase**      | Latest   | Authentication client      |
+| State Mgmt    | **Zustand**       | Latest   | Global auth state          |
 | Theme         | **next-themes**   | 0.4.6    | Dark/light mode            |
 
 ### Deployment
@@ -149,6 +155,7 @@ sequenceDiagram
    - **OpenAI** → [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
    - **Cartesia** → [cartesia.ai](https://cartesia.ai) (free tier available)
    - **Metered TURN** → [metered.ca](https://metered.ca) (free tier for WebRTC)
+   - **Supabase** → [supabase.com](https://supabase.com) (free tier for Auth/DB)
 
 ### Installation
 
@@ -174,6 +181,8 @@ cp .env.example .env
 # DEEPGRAM_API_KEY=your_key_here
 # OPENAI_API_KEY=sk-...
 # CARTESIA_API_KEY=your_key_here
+# SUPABASE_URL=https://your-project.supabase.co
+# SUPABASE_SERVICE_KEY=your_service_role_key
 # ICE_SERVERS=[{"urls":"stun:..."},{"urls":"turn:...","username":"...","credential":"..."}]
 ```
 
@@ -223,6 +232,8 @@ npm install
 
 # (Optional) Create .env for custom API URL
 # echo "VITE_API_URL=http://localhost:7860" > .env
+# echo "VITE_SUPABASE_URL=https://your-project.supabase.co" >> .env
+# echo "VITE_SUPABASE_ANON_KEY=your_anon_key" >> .env
 
 # Start development server
 npm run dev
@@ -232,11 +243,14 @@ Frontend runs at: **http://localhost:5173**
 
 ### First Conversation
 
+### First Conversation
+
 1. Open **http://localhost:5173** in Chrome or Firefox
-2. Click **"Start Conversation"** button
-3. Allow microphone access when prompted
-4. Wait 2-3 seconds for the bot to greet you
-5. Start asking questions about Sanket Devmunde's work!
+2. **Sign Up** or **Login** to your account
+3. Click **"Start Conversation"** button
+4. Allow microphone access when prompted
+5. Wait for the personalized greeting: _"Hey [Your Name]!..."_
+6. Start asking questions about Sanket Devmunde's work!
 
 **Example Questions:**
 
@@ -378,7 +392,8 @@ Edit `frontend/src/App.tsx` or `frontend/tailwind.config.js` for colors and styl
 personal-voice-bot/
 ├── backend/
 │   ├── bot.py                  # Pipecat voice pipeline & AI persona
-│   ├── server.py               # FastAPI WebRTC signaling server
+│   ├── server.py               # FastAPI WebRTC signaling server & Auth endpoints
+│   ├── auth.py                 # Supabase authentication logic
 │   ├── pyproject.toml          # Python dependencies (uv)
 │   ├── .env.example            # Environment variable template
 │   ├── Dockerfile              # Container configuration
@@ -386,11 +401,13 @@ personal-voice-bot/
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── App.tsx             # Main React app with WebRTC client
-│   │   ├── components/         # shadcn/ui + MagicUI components
-│   │   │   ├── ui/             # Button, Dropdown, etc.
-│   │   │   └── magicui/        # Animated components (Ripple, Marquee)
-│   │   ├── lib/                # Utility functions
+│   │   ├── App.tsx             # Main React app with Routing & WebRTC
+│   │   ├── components/
+│   │   │   ├── auth/           # Login, Signup, ProtectedRoute
+│   │   │   ├── ui/             # shadcn/ui + UserMenu, AnimatedGreeting
+│   │   │   └── magicui/        # Animated components
+│   │   ├── lib/                # Supabase client & utils
+│   │   ├── store/              # Zustand Auth Store
 │   │   └── index.css           # Global Tailwind styles
 │   ├── package.json            # Node dependencies
 │   ├── vite.config.ts          # Vite bundler config
@@ -425,20 +442,24 @@ See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for complete production deployment inst
 
 ### Backend (.env)
 
-| Variable           | Required       | Description              | Example                 |
-| ------------------ | -------------- | ------------------------ | ----------------------- |
-| `DEEPGRAM_API_KEY` | ✅ Yes         | Deepgram STT API key     | `a1b2c3d4e5f6...`       |
-| `OPENAI_API_KEY`   | ✅ Yes         | OpenAI GPT API key       | `sk-proj-...`           |
-| `CARTESIA_API_KEY` | ✅ Yes         | Cartesia TTS API key     | `cart_...`              |
-| `ICE_SERVERS`      | ⚠️ Recommended | TURN/STUN servers (JSON) | `[{"urls":"stun:..."}]` |
-| `PORT`             | ⚙️ Optional    | Server port              | `7860` (default)        |
-| `HOST`             | ⚙️ Optional    | Server host              | `0.0.0.0` (default)     |
+| Variable               | Required       | Description               | Example                 |
+| ---------------------- | -------------- | ------------------------- | ----------------------- |
+| `DEEPGRAM_API_KEY`     | ✅ Yes         | Deepgram STT API key      | `a1b2c3d4e5f6...`       |
+| `OPENAI_API_KEY`       | ✅ Yes         | OpenAI GPT API key        | `sk-proj-...`           |
+| `CARTESIA_API_KEY`     | ✅ Yes         | Cartesia TTS API key      | `cart_...`              |
+| `SUPABASE_URL`         | ✅ Yes         | Supabase Project URL      | `https://...`           |
+| `SUPABASE_SERVICE_KEY` | ✅ Yes         | Supabase Service Role Key | `eyJ...`                |
+| `ICE_SERVERS`          | ⚠️ Recommended | TURN/STUN servers (JSON)  | `[{"urls":"stun:..."}]` |
+| `PORT`                 | ⚙️ Optional    | Server port               | `7860` (default)        |
+| `HOST`                 | ⚙️ Optional    | Server host               | `0.0.0.0` (default)     |
 
 ### Frontend (.env)
 
-| Variable       | Required    | Description | Example                                         |
-| -------------- | ----------- | ----------- | ----------------------------------------------- |
-| `VITE_API_URL` | ⚙️ Optional | Backend URL | `http://localhost:7860` (default for local dev) |
+| Variable                 | Required    | Description          | Example                                         |
+| ------------------------ | ----------- | -------------------- | ----------------------------------------------- |
+| `VITE_API_URL`           | ⚙️ Optional | Backend URL          | `http://localhost:7860` (default for local dev) |
+| `VITE_SUPABASE_URL`      | ✅ Yes      | Supabase Project URL | `https://...`                                   |
+| `VITE_SUPABASE_ANON_KEY` | ✅ Yes      | Supabase Anon Key    | `eyJ...`                                        |
 
 ## 🛠️ Troubleshooting
 

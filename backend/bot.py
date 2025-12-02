@@ -51,7 +51,7 @@ class TextSender(FrameProcessor):
 
         await self.push_frame(frame, direction)
 
-async def run_bot(transport, args: RunnerArguments):
+async def run_bot(transport, args: RunnerArguments, user_name: str = None):
     """Main bot logic"""
     
     # Create AI Services
@@ -164,11 +164,16 @@ You believe in learning by building production-ready systems. You prefer Docker 
     @transport.event_handler("on_client_connected")
     async def on_client_connected(transport, client):
         logger.info(f"Client connected")
-        # Add greeting message
+        # Add personalized greeting message with user's name
+        if user_name:
+            greeting_message = f"Greet the user warmly by saying: 'Hey {user_name}! I am a Voice Assistant on behalf of Sanket Devmunde, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
+        else:
+            greeting_message = "Greet the user by saying: 'Hey there! I am a Voice Assistant on behalf of Sanket Devmunde, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
+        
         messages.append(
             {
                 "role": "system",
-                "content": "Say hello and briefly introduce yourself.",
+                "content": greeting_message,
             }
         )
         # Start the conversation
