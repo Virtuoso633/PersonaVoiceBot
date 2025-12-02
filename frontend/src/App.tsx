@@ -89,9 +89,9 @@ function StreamingText({
 
 function Navbar() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/50 backdrop-blur-xl h-20 transition-all duration-300">
-      <div className="container mx-auto flex h-full items-center justify-between px-4 lg:px-8">
-        <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-foreground group cursor-pointer">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/50 backdrop-blur-xl h-16 md:h-20 transition-all duration-300">
+      <div className="container mx-auto flex h-full items-center justify-between px-4 md:px-8">
+        <div className="flex items-center gap-2 font-bold text-lg md:text-xl tracking-tight text-foreground group cursor-pointer">
           <div className="p-1 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-lg group-hover:rotate-12 transition-transform duration-300">
             <Sparkles className="w-5 h-5 text-white animate-[spin_3s_linear_infinite]" />
           </div>
@@ -114,16 +114,16 @@ function UserProfile() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-32 px-4 flex flex-col items-center">
-      <div className="max-w-2xl w-full bg-card/50 border border-border rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground pt-24 md:pt-32 px-4 flex flex-col items-center">
+      <div className="max-w-2xl w-full bg-card/50 border border-border rounded-3xl p-6 md:p-8 backdrop-blur-xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
 
         <div className="flex items-center gap-6 mb-8">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-4xl font-bold">
+          <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-3xl md:text-4xl font-bold">
             {username?.[0]?.toUpperCase()}
           </div>
           <div>
-            <h1 className="text-3xl font-bold">{username}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{username}</h1>
             <p className="text-muted-foreground">
               Full Stack Developer & AI Enthusiast
             </p>
@@ -336,7 +336,7 @@ function Home() {
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-indigo-500/30 overflow-x-hidden">
       <Navbar />
 
-      <main className="relative pt-32 pb-16 px-4 lg:px-8">
+      <main className="relative pt-24 md:pt-32 pb-16 px-4 md:px-8">
         {/* Background Gradients */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] max-w-[1000px] bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none opacity-50" />
 
@@ -350,7 +350,7 @@ function Home() {
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight pb-2 relative">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight pb-2 relative">
               <span className="bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/60 relative z-10">
                 Intelligent Voice Interface <br />
                 for the Modern Web.
@@ -359,7 +359,7 @@ function Home() {
             </h1>
 
             {/* Subheadline */}
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Experience natural, real-time conversations with a custom AI
               persona. Powered by Pipecat, Deepgram, and OpenAI for seamless
               interaction.
@@ -392,7 +392,7 @@ function Home() {
 
             {/* Tech Stack Marquee */}
             <div className="pt-16 max-w-4xl mx-auto overflow-hidden mask-gradient-x">
-              <Marquee className="[--duration:20s]" pauseOnHover reverse>
+              <Marquee className="[--duration:20s]" pauseOnHover>
                 <div className="flex items-center gap-2 text-muted-foreground mx-8">
                   <Code className="w-5 h-5" /> React
                 </div>
@@ -417,9 +417,9 @@ function Home() {
         ) : (
           <div className="max-w-4xl mx-auto relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
             {/* Active Session View */}
-            <div className="relative aspect-video bg-card/50 border border-border rounded-3xl overflow-hidden backdrop-blur-xl shadow-2xl">
+            <div className="relative aspect-[3/4] sm:aspect-video bg-card/50 border border-border rounded-3xl overflow-hidden backdrop-blur-xl shadow-2xl">
               <Ripple
-                mainCircleSize={150}
+                mainCircleSize={120}
                 numCircles={6}
                 className="opacity-50"
               />
@@ -457,7 +457,7 @@ function Home() {
                 </div>
 
                 {/* Transcript */}
-                <div className="w-full max-w-2xl space-y-4 max-h-[200px] overflow-y-auto no-scrollbar mask-gradient-b">
+                <div className="w-full max-w-2xl space-y-4 max-h-[300px] sm:max-h-[200px] overflow-y-auto no-scrollbar mask-gradient-b">
                   {messages.length === 0 ? (
                     <p className="text-center text-muted-foreground text-sm">
                       Listening...
