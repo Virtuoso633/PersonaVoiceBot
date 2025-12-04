@@ -601,8 +601,6 @@ Special thanks to the open-source community! 💙
 
 ---
 
-**Built by Sanket Devmunde** | [GitHub](https://github.com/Virtuoso633) | [LinkedIn](https://linkedin.com/in/sanket-devmunde)
-
 _Production-ready AI voice assistant with <1s latency_ ⚡
 
 
