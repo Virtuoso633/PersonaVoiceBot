@@ -23,6 +23,11 @@ logger.remove()
 logger.add(sys.stderr, level="DEBUG")
 logging.basicConfig(level=logging.DEBUG) # Enable aiortc debug logs
 
+# Suppress verbose HTTP client logs (httpx, httpcore, hpack)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("hpack").setLevel(logging.WARNING)
+
 # --- Helpers ---
 def get_ice_servers():
     """Get ICE servers from environment variable or default to Google STUN."""
@@ -172,19 +177,15 @@ async def check_email(request: Request):
         if not supabase:
             raise HTTPException(status_code=500, detail="Authentication service not configured")
         
-        # Use Supabase Admin API to check if user exists
-        # This uses the service key which has admin privileges
+        # Use admin API with pagination to check if email exists
+        # This is more efficient than fetching all users without pagination
         try:
-            response = supabase.auth.admin.list_users()
+            response = supabase.auth.admin.list_users(page=1, per_page=1000)
             users = response if isinstance(response, list) else []
-            
-            # Check if any user has this email
             email_exists = any(user.email == email for user in users)
-            
             return {"exists": email_exists}
         except Exception as e:
             logger.error(f"Error checking email: {e}")
-            # If we can't check, return exists: false to be safe
             return {"exists": False}
             
     except Exception as e:
