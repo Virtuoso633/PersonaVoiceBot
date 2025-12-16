@@ -201,6 +201,23 @@ async def get_connection_details():
         "ice_servers": get_ice_servers()
     }
 
+@app.get("/health")
+async def health_check():
+    """
+    Lightweight health check endpoint for keep-alive pings.
+    
+    This endpoint:
+    - Does NOT require authentication
+    - Does NOT trigger any expensive API calls (Deepgram, Gemini, etc.)
+    - Returns immediately with minimal processing
+    
+    Use this with external services like UptimeRobot, Cron-job.org, 
+    or GitHub Actions to prevent Render from spinning down after inactivity.
+    
+    Recommended: Ping every 5 minutes to stay within Render's 15-minute timeout.
+    """
+    return {"status": "healthy", "service": "voice-bot-backend"}
+
 @app.post("/offer")
 async def offer_endpoint(request: SmallWebRTCRequest, current_user: dict = Depends(get_current_user)):
     """Handle WebRTC offer from client (protected)."""
