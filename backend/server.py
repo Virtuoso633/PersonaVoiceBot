@@ -201,7 +201,7 @@ async def get_connection_details():
         "ice_servers": get_ice_servers()
     }
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     """
     Lightweight health check endpoint for keep-alive pings.
