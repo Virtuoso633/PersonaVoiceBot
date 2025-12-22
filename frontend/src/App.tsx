@@ -433,7 +433,7 @@ function Home() {
                   className="relative h-[50px] px-8 rounded-full border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground font-medium text-base transition-all"
                   onClick={() =>
                     window.open(
-                      "https://github.com/Virtuoso633/PersonaVoiceBot",
+                      "https://github.com/Virtuoso633/PersonaVoiceBotDesignDoc",
                       "_blank"
                     )
                   }
