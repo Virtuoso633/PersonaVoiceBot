@@ -92,6 +92,14 @@ sequenceDiagram
 
     Note over F,B: Low-latency <1s response time
 ```
+--
+<img width="1146" height="691" alt="image" src="https://github.com/user-attachments/assets/9a609aa5-f72f-47c3-9a2e-3ced5ae9fb4b" />
+
+--
+
+<img width="1371" height="847" alt="image" src="https://github.com/user-attachments/assets/102d050a-3875-41c7-9731-5b5c52fca9b9" />
+
+--
 
 ## 📋 Tech Stack
 
