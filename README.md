@@ -1,6 +1,6 @@
 # Personal AI Voice Assistant 🎙️
 
-> A production-ready AI voice assistant featuring **Sanket Devmunde's** professional persona, powered by Pipecat, Deepgram, OpenAI GPT-4, and Cartesia with real-time WebRTC communication.
+> A production-ready AI voice assistant featuring **[PersonName]** professional persona, powered by Pipecat, Deepgram, OpenAI GPT-4, and Cartesia with real-time WebRTC communication.
 
 [![Deploy on Render](https://img.shields.io/badge/Deploy-Render-5850EC?logo=render)](https://render.com)
 [![Deploy on Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel)](https://vercel.com)
@@ -8,7 +8,7 @@
 
 ## ✨ Features
 
-- 🎯 **AI Persona** - Answers questions about Sanket Devmunde's professional experience, skills, and projects
+- 🎯 **AI Persona** - Answers questions about [PersonName] professional experience, skills, and projects
 - ⚡ **Real-time Voice** - \<1 second latency with WebRTC audio streaming
 - 🧠 **Smart Context** - Maintains conversation history across multiple turns
 - 🎨 **Beautiful UI** - Modern dark-themed interface with streaming transcriptions
@@ -258,7 +258,7 @@ Frontend runs at: **http://localhost:5173**
 3. Click **"Start Conversation"** button
 4. Allow microphone access when prompted
 5. Wait for the personalized greeting: _"Hey [Your Name]!..."_
-6. Start asking questions about Sanket Devmunde's work!
+6. Start asking questions about [Names] work!
 
 **Example Questions:**
 
@@ -612,3 +612,4 @@ Special thanks to the open-source community! 💙
 _Production-ready AI voice assistant with <1s latency_ ⚡
 
 
+- *[Video Demo](https://drive.google.com/file/d/1IboHfJKr0nlDsGIJhJEYiNxP8RHz4HI6/view)*
