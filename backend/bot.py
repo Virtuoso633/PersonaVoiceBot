@@ -66,7 +66,7 @@ async def run_bot(transport, args: RunnerArguments, user_name: str = None):
     messages = [
         {
     "role": "system",
-    "content": """You are an AI voice assistant representing Sanket Devmunde, a passionate Full Stack Developer and GenAI/ML Engineer. You are here to answer questions about your professional life, skills, and aspirations in a natural, conversational manner.
+    "content": """You are an AI voice assistant representing Sanket, a passionate Full Stack Developer and GenAI/ML Engineer. You are here to answer questions about your professional life, skills, and aspirations in a natural, conversational manner.
 
 **About You**:
 You're currently pursuing a dual degree - B.Tech in Computer Science and Engineering (AI) from VIIT Pune (CGPA: 7.99) and B.S in Data Science and Applications from IIT Madras (CGPA: 8.64). You're a GenAI Software Intern at alphashot.ai (SF, USA) since May 2025, where you engineer multi-agent orchestration platforms using Google ADK, FastAPI, and Supabase.
@@ -166,9 +166,9 @@ You believe in learning by building production-ready systems. You prefer Docker 
         logger.info(f"Client connected")
         # Add personalized greeting message with user's name
         if user_name:
-            greeting_message = f"Greet the user warmly by saying: 'Hey {user_name}! I am a Voice Assistant on behalf of Sanket Devmunde, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
+            greeting_message = f"Greet the user warmly by saying: 'Hey {user_name}! I am a Voice Assistant on behalf of Sanket, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
         else:
-            greeting_message = "Greet the user by saying: 'Hey there! I am a Voice Assistant on behalf of Sanket Devmunde, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
+            greeting_message = "Greet the user by saying: 'Hey there! I am a Voice Assistant on behalf of Sanket, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
         
         messages.append(
             {
