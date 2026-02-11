@@ -1095,9 +1095,9 @@ async def run_bot(transport, args: RunnerArguments, user_name: str = None):
 
         # Add personalized greeting message with user's name
         if user_name:
-            greeting_message = f"Greet the user warmly by saying: 'Hey {user_name}! I am a Voice Assistant on behalf of Sanket Devmunde, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
+            greeting_message = f"Greet the user warmly by saying: 'Hey {user_name}! I am a Voice Assistant on behalf of Sanket, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
         else:
-            greeting_message = "Greet the user by saying: 'Hey there! I am a Voice Assistant on behalf of Sanket Devmunde, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
+            greeting_message = "Greet the user by saying: 'Hey there! I am a Voice Assistant on behalf of Sanket, and I am trained on his resume and professional data. So you can ask me anything about him.' Keep it natural and conversational."
 
         messages.append({
             "role": "system",
